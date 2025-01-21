@@ -391,14 +391,16 @@ class _QrViewState extends State<QrView> {
                       Icon(
                         _isSuccess
                             ? Icons.check_circle
-                            : Icons.cancel_outlined,
-                        color: _isSuccess ? Colors.green : Colors.red,
+                            // : Icons.cancel_outlined,
+                            : Icons.check_circle,
+                        color: _isSuccess ? Colors.green : Colors.green,//Colors.red,
                         size: 100,
                       ),
                       Text(
                         _isSuccess
-                            ? 'Scanned Successfully'
-                            : 'Kit Not Found',
+                            ? 'Kit Scanned Successfully'
+                            // : 'Kit Not Found',
+                            : 'Kit Scanned Successfully',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

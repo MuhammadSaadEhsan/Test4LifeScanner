@@ -293,62 +293,107 @@ class _QrViewState extends State<QrView> {
     });
   }
 
-  Future<void> _processQRCode(String code) async {
-    setState(() {
-      _isProcessing = true;
-      _isSuccess = false;
-      _isError = false;
-    });
+  // Future<void> _processQRCode(String code) async {
+  //   setState(() {
+  //     _isProcessing = true;
+  //     _isSuccess = false;
+  //     _isError = false;
+  //   });
 
-    // Pause the camera while processing the API request
-    controller?.pauseCamera();
+  //   // Pause the camera while processing the API request
+  //   controller?.pauseCamera();
 
-    const apiUrl1 = 'https://testforlife-a4b515517434.herokuapp.com/kitrecbyqr';
-    const apiUrl2 = 'https://yourgutmap-food-sensitivity-423a2af84621.herokuapp.com/kitrecbyqr'; // Add the second API URL here
+  //   const apiUrl1 = 'https://testforlife-a4b515517434.herokuapp.com/kitrecbyqr';
+  //   const apiUrl2 = 'https://yourgutmap-food-sensitivity-423a2af84621.herokuapp.com/kitrecbyqr'; // Add the second API URL here
 
-    try {
-      // Call both APIs
-      final response1 = await http.post(
-        Uri.parse(apiUrl1),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'qrCode': code}),
-      );
+  //   try {
+  //     // Call both APIs
+  //     final response1 = await http.post(
+  //       Uri.parse(apiUrl1),
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode({'qrCode': code}),
+  //     );
 
-      final response2 = await http.post(
-        Uri.parse(apiUrl2),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'qrCode': code}),
-      );
+  //     final response2 = await http.post(
+  //       Uri.parse(apiUrl2),
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode({'qrCode': code}),
+  //     );
 
-      if (response1.statusCode == 200 || response2.statusCode == 200) {
-        setState(() {
-          _isSuccess = true;
-        });
-      } else {
-        setState(() {
-          _isError = true;
-        });
-      }
+  //     if (response1.statusCode == 200 || response2.statusCode == 200) {
+  //       setState(() {
+  //         _isSuccess = true;
+  //       });
+  //     } else {
+  //       setState(() {
+  //         _isError = true;
+  //       });
+  //     }
 
-      // Show success or error message for 1 second and then reset
-      await Future.delayed(const Duration(seconds: 1));
+  //     // Show success or error message for 1 second and then reset
+  //     await Future.delayed(const Duration(seconds: 1));
+  //     setState(() {
+  //       _isSuccess = false;
+  //       _isError = false;
+  //     });
+  //   } catch (e) {
+  //     log('Error sending QR code: $e');
+  //     setState(() {
+  //       _isError = true;
+  //     });
+  //   } finally {
+  //     // Resume the camera after processing
+  //     controller?.resumeCamera();
+  //     setState(() {
+  //       _isProcessing = false;
+  //     });
+  //   }
+  // }
+
+Future<void> _processQRCode(String code) async {
+  setState(() {
+    _isProcessing = true;
+    _isSuccess = false;
+    _isError = false;
+  });
+
+  controller?.pauseCamera();
+
+  final apiUrl = 'https://yourgutmap-food-sensitivity-423a2af84621.herokuapp.com/scankit?kitID=$code';
+
+  try {
+    final response = await http.get(Uri.parse(apiUrl));
+
+    if (response.statusCode == 200) {
       setState(() {
-        _isSuccess = false;
-        _isError = false;
+        _isSuccess = true;
       });
-    } catch (e) {
-      log('Error sending QR code: $e');
+    } else {
+      log('Failed to send request: ${response.body}');
       setState(() {
         _isError = true;
       });
-    } finally {
-      // Resume the camera after processing
-      controller?.resumeCamera();
-      setState(() {
-        _isProcessing = false;
-      });
     }
+
+    await Future.delayed(const Duration(seconds: 1));
+    setState(() {
+      _isSuccess = false;
+      _isError = false;
+    });
+  } catch (e) {
+    log('Error sending request: $e');
+    setState(() {
+      _isError = true;
+    });
+  } finally {
+    controller?.resumeCamera();
+    setState(() {
+      _isProcessing = false;
+    });
   }
+}
+
+
 
   @override
   void dispose() {
